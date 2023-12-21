@@ -1,0 +1,33 @@
+version: '3'
+services:
+  db:
+    env_file: .env
+    build:
+      context: ./db
+      dockerfile: /db_dockerfile
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres-data:/var/lib/postgresql
+    networks:
+      - app_network
+
+  app:
+    env_file: .env
+    ports:
+      - '80:${APP_PORT}'
+    build:
+      context: ./
+      dockerfile: /app_dockerfile
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:

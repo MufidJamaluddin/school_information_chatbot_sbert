@@ -1,0 +1,14 @@
+FROM postgres:15.3
+
+RUN DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y install git build-essential postgresql-server-dev-15 apt-utils
+
+RUN git clone --branch v0.5.1 https://github.com/pgvector/pgvector.git
+RUN cd pgvector && make && make install
+
+RUN apt -y purge git build-essential postgresql-server-dev-15
+RUN echo "en_US.UTF-8 UTF-8"> /etc/locale.gen 
+RUN locale-gen
+
+COPY ./init.sql /docker-entrypoint-initdb.d/
+COPY ./schema.sql /docker-entrypoint-initdb.d/
