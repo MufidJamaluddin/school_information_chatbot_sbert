@@ -271,3 +271,6 @@ sketch
 
 model/*
 docs/*
+
+chat_app
+setup-gotch.sh

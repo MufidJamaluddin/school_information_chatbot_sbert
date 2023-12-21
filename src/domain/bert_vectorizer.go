@@ -3,7 +3,6 @@ package domain
 import (
 	"fmt"
 	"log"
-	"math"
 
 	"github.com/MufidJamaluddin/transformer"
 	"github.com/MufidJamaluddin/transformer/bert"
@@ -23,7 +22,6 @@ type sbertVectorizer struct {
 	config      bert.BertConfig
 	model       bert.BertEmbedding
 	tokenizer   *bert.Tokenizer
-	angleRates  []float64
 }
 
 func NewSBertVectorizer(filePath, fileName string) ISBertVectorizer {
@@ -48,20 +46,16 @@ func NewSBertVectorizer(filePath, fileName string) ISBertVectorizer {
 		log.Fatal("Error on loading BERT Tokenizer Model", err)
 	}
 
-	angleRates := computeAngleRates(int(config.HiddenSize))
-
 	return &sbertVectorizer{
 		compileMode: device,
 		config:      config,
 		model:       model,
 		tokenizer:   tk,
-		angleRates:  angleRates,
 	}
 }
 
 func (s *sbertVectorizer) Encode(text string) (result []float64, err error) {
 	singleEncodeInput := tokenizer.NewSingleEncodeInput(tokenizer.NewInputSequence(text))
-	scale := 20
 
 	encodingResult, err := s.tokenizer.Encode(singleEncodeInput, true)
 	if err != nil {
@@ -69,19 +63,31 @@ func (s *sbertVectorizer) Encode(text string) (result []float64, err error) {
 	}
 
 	var attentionMask []float64
-	for _, attentionMaskItem := range encodingResult.AttentionMask {
-		attentionMask = append(attentionMask, float64(attentionMaskItem))
+	var tokenIds []int
+	var typeIds []int
+	var positionIds []int
+
+	for i := 0; i < len(encodingResult.Ids); i++ {
+		if encodingResult.Words[i] < 0 {
+			positionIds = append(positionIds, 0)
+		} else {
+			positionIds = append(positionIds, encodingResult.Words[i])
+		}
+
+		attentionMask = append(attentionMask, float64(encodingResult.AttentionMask[i]))
+		tokenIds = append(tokenIds, encodingResult.Ids[i])
+		typeIds = append(typeIds, encodingResult.TypeIds[i])
 	}
 
-	tokenIdsTensor := ts.TensorFrom(encodingResult.Ids).MustTo(s.compileMode, true)
-	typeIdsTensor := ts.TensorFrom(encodingResult.TypeIds).MustTo(s.compileMode, true)
-	positionalEncoding := createPositionalEncodingTensor(encodingResult.Words, s.angleRates, scale).MustTo(s.compileMode, true)
+	tokenIdsTensor := ts.TensorFrom(tokenIds).MustTo(s.compileMode, true)
+	typeIdsTensor := ts.TensorFrom(typeIds).MustTo(s.compileMode, true)
+	positionIdsTensor := ts.TensorFrom(positionIds).MustTo(s.compileMode, true)
 
 	ts.NoGrad(func() {
 		sbertResult, err := s.model.ForwardT(
 			tokenIdsTensor,
-			typeIdsTensor,      // [m] Apply With [512, 768]
-			positionalEncoding, // [m, 768] Apply With [2, 768]
+			typeIdsTensor,
+			positionIdsTensor,
 			ts.None,
 			false,
 		)
@@ -110,7 +116,7 @@ func (s *sbertVectorizer) MeanPooling(
 		return nil, err
 	}
 
-	expandedMask, err := squeezeMask.Expand([]int64{modelOutput.MustSize()[0], 1}, false, true)
+	expandedMask, err := squeezeMask.Expand(modelOutput.MustSize(), false, true)
 	if err != nil {
 		fmt.Println("Error in Expanded Mask Expanded", err)
 		return nil, err
@@ -140,47 +146,5 @@ func (s *sbertVectorizer) MeanPooling(
 		return nil, err
 	}
 
-	dividedRes, err := multipleSum.Divide(expandedMaskClamp, true)
-	if err != nil {
-		fmt.Println("Error in Divide Multiple by Sum Mask", err)
-		return nil, err
-	}
-
-	return dividedRes.Clamp(ts.FloatScalar(-1), ts.FloatScalar(1), true)
-}
-
-func createPositionalEncodingTensor(wordIndexs []int, angleRates []float64, scale int) *ts.Tensor {
-	var positionalEncoding []int
-	mScale := float64(scale)
-
-	for i := 0; i < len(wordIndexs); i++ {
-		positionalEncoding = append(
-			positionalEncoding,
-			int(math.Round(calculatePositionalEncodingItem(i, wordIndexs[i], angleRates)*mScale)),
-		)
-	}
-
-	return ts.TensorFrom(positionalEncoding)
-}
-
-func calculatePositionalEncodingItem(index int, modelIndex int, angleRates []float64) float64 {
-	scale := 10000.0
-	angle := float64(modelIndex) / scale
-
-	if index%2 == 0 {
-		return math.Sin(angle * angleRates[index/2])
-	}
-
-	return math.Cos(angle * angleRates[index/2])
-}
-
-func computeAngleRates(embeddingSize int) []float64 {
-	scale := 10000.0
-	angleRates := make([]float64, embeddingSize/2)
-
-	for i := 0; i < embeddingSize/2; i++ {
-		angleRates[i] = math.Pow(scale, float64(2*i)/float64(embeddingSize))
-	}
-
-	return angleRates
+	return multipleSum.Divide(expandedMaskClamp, true)
 }
