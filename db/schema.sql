@@ -41,6 +41,7 @@ CREATE TABLE "question" (
 CREATE TABLE "user" (
     id serial not null primary key,
     full_name varchar(50) not null,
+    user_role varchar(20) not null,
     is_student boolean default FALSE,
     class_name varchar(30) not null,
     age SMALLINT not null,
