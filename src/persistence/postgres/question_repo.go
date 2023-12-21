@@ -49,8 +49,6 @@ func (t *questionRepository) FindAnswer(nearestAnswer string) (answer string, er
 				question_vector_sbert <-> '%s' AS similarity
 			FROM
 				"question"
-			WHERE
-				similarity > 0
 			ORDER BY
 				similarity
 			LIMIT 1;`,
@@ -95,8 +93,6 @@ func (t *questionRepository) FindAnswerWithSimilarityValue(
 				question_vector_sbert <-> '%s' AS similarity
 			FROM
 				"question"
-			WHERE
-				similarity > 0
 			ORDER BY
 				similarity
 			LIMIT 1;`,

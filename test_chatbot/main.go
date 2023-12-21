@@ -6,16 +6,24 @@ import (
 	"chatbot_be_go/src/persistence"
 	appConf "chatbot_be_go/src/persistence/config"
 	"context"
+	"database/sql"
 	"encoding/csv"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strings"
-	"database/sql"
+
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
+
+type testModel struct {
+	ScenarioNo    uint64
+	ScenarioName  string
+	ModelPath     string
+	ModelFileName string
+}
 
 // Menyimpan Data Singkatan dari CSV kedalam Database
 func loadAbbreviation(
@@ -220,40 +228,37 @@ func main() {
 	logger := logrus.New()
 	config := appConf.New()
 
-	modelPath := ""
-
-	var scenarioNo uint64
-	var scenarioName string
-	var modelFileName string
-
-	if config.IsFineTuneModel {
-		scenarioNo = 2
-		scenarioName = "fine_tuned_model"
-
-		modelPath = "/fine_tuned_model"
-		modelFileName = "model.pkl"
-	} else {
-		scenarioNo = 1
-		scenarioName = "ori_model"
-	
-		modelPath = "/ori_model"
-		modelFileName = "model.pkl"
+	testScenario := []testModel{
+		{
+			ScenarioNo:    1,
+			ScenarioName:  "ori_model",
+			ModelPath:     "/ori_model",
+			ModelFileName: "model.pkl",
+		},
+		{
+			ScenarioNo:    2,
+			ScenarioName:  "fine_tuned_model",
+			ModelPath:     "/fine_tuned_model",
+			ModelFileName: "model.pkl",
+		},
 	}
 
-	vectorizer := dm.NewSBertVectorizer(modelPath, modelFileName)
+	for _, scenario := range testScenario {
+		vectorizer := dm.NewSBertVectorizer(scenario.ModelPath, scenario.ModelFileName)
 
-	persistenceObj := persistence.New(
-		vectorizer,
-		config.SqlDb,
-		logger,
-	)
+		persistenceObj := persistence.New(
+			vectorizer,
+			config.SqlDb,
+			logger,
+		)
 
-	log.Println("Baca Singkatan")
-	loadAbbreviation(persistenceObj)
+		log.Println("Baca Singkatan")
+		loadAbbreviation(persistenceObj)
 
-	log.Println("Baca Semua Data Latih Pertanyaan dan Jawaban")
-	loadDataQuestionAndAnswer(persistenceObj)
+		log.Println("Baca Semua Data Latih Pertanyaan dan Jawaban")
+		loadDataQuestionAndAnswer(persistenceObj)
 
-	log.Println("Uji Pertanyaan dan Jawaban")
-	loadTestQuestionAndAnswer(scenarioNo, scenarioName, persistenceObj)
+		log.Println("Uji Pertanyaan dan Jawaban")
+		loadTestQuestionAndAnswer(scenario.ScenarioNo, scenario.ScenarioName, persistenceObj)
+	}
 }
