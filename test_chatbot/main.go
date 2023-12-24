@@ -166,7 +166,7 @@ func loadTestQuestionAndAnswer(
 
 	// File Test Result
 	nTestResultFile, err := os.Create(
-		fmt.Sprintf("test_tfidf_%d_%s.csv", scenarioNo, scenarioName),
+		fmt.Sprintf("test_sbert_%d_%s.csv", scenarioNo, scenarioName),
 	)
 	if err != nil {
 		log.Fatal(err)
