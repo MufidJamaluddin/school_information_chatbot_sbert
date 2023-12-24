@@ -12,9 +12,9 @@ import (
 	uq "chatbot_be_go/src/application/unanswered_question"
 	us "chatbot_be_go/src/application/user"
 	usa "chatbot_be_go/src/application/user_response"
-	dm "chatbot_be_go/src/domain"
 	"chatbot_be_go/src/persistence/config"
 	"chatbot_be_go/src/persistence/postgres"
+	dm "chatbot_be_go/src/persistence/rest"
 
 	"github.com/sirupsen/logrus"
 )

@@ -23,13 +23,14 @@ type AppConfig struct {
 	HeaderTokenKeyName   string
 	IsLogged             bool
 	IsFineTuneModel      bool
+	EmbeddingServerHost  string
 }
 
 type HttpConf struct {
-	Host           string
-	Port           string
-	Limiter        limiter.Config
-	S2STimeoutSecs time.Duration
+	Host       string
+	Port       string
+	Limiter    limiter.Config
+	S2STimeout time.Duration
 }
 
 type WhatsAppConf struct {
@@ -68,7 +69,7 @@ func New() *AppConfig {
 			Max:        5,
 			Expiration: 1 * time.Second,
 		},
-		S2STimeoutSecs: time.Duration(timeout) * time.Second,
+		S2STimeout: time.Duration(timeout) * time.Second,
 	}
 
 	sqlDbConf := SqlDbConf{
@@ -123,5 +124,6 @@ func New() *AppConfig {
 		HeaderTokenKeyName:   headerTokenKeyName,
 		IsLogged:             os.Getenv("IS_LOGGED") == "true",
 		IsFineTuneModel:      os.Getenv("IS_FINE_TUNE_MODEL") == "true",
+		EmbeddingServerHost:  os.Getenv("EMBEDDING_SERVER_HOST"),
 	}
 }

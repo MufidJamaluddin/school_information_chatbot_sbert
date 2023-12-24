@@ -1,0 +1,13 @@
+## BUILD STAGE
+
+FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime AS build
+
+WORKDIR /app
+
+COPY server.py .
+COPY requirement.txt .
+COPY model/ ./model
+
+RUN pip install -r ./requirement.txt
+
+CMD ["python", "./server.py"]

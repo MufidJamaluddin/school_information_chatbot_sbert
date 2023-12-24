@@ -1,84 +1,31 @@
 ## BUILD STAGE
-FROM ubuntu:18.04 AS build
 
-ENV DEBIAN_FRONTEND noninteractive
+FROM golang:1.21 AS build
 
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential ca-certificates curl unzip wget
-
-RUN wget https://apt.llvm.org/llvm.sh
-RUN chmod u+x llvm.sh
-RUN sudo ./llvm.sh 17
-
-ENV cc=clang
-ENV cxx=clang++
-ENV HOME=/app
-ENV GOPATH="$HOME/go"
-ENV PATH=$PATH:/usr/local/go/bin
-ENV CUDA_VER=cpu
-ENV GOTCH_VER=v0.9.1
-
-WORKDIR /tmp
-
-RUN wget -c https://golang.org/dl/go1.21.5.linux-amd64.tar.gz \
-    && rm -rf /usr/local/go && tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz \
-    && rm go1.21.5.linux-amd64.tar.gz
-
-RUN wget https://github.com/sugarme/gotch/releases/download/v0.9.0/setup-libtorch.sh && \
-    chmod +x setup-libtorch.sh && \
-    sed -i 's/sudo//g' setup-libtorch.sh && \
-    bash setup-libtorch.sh
-
-ENV GOTCH_LIBTORCH="/usr/local/lib/libtorch"
-ENV LIBRARY_PATH="$LIBRARY_PATH:$GOTCH_LIBTORCH/lib"
-ENV CPATH="$CPATH:$GOTCH_LIBTORCH/lib:$GOTCH_LIBTORCH/include:$GOTCH_LIBTORCH/include/torch/csrc/api/include"
-ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$GOTCH_LIBTORCH/lib"
-
-WORKDIR "$GOPATH/app"
-
-RUN wget https://github.com/sugarme/gotch/releases/download/v0.9.0/setup-gotch.sh && \
-    chmod +x setup-gotch.sh && \
-    sed -i 's/sudo//g' setup-gotch.sh
-
-ENV CUDA_VER=cpu
-ENV GOTCH_VER=v0.9.1
-
-RUN bash setup-gotch.sh
+WORKDIR /app
 
 COPY go.mod go.sum ./
-RUN go mod download
 
-RUN mkdir "$HOME/.cache/transformer"
+RUN go mod download
 
 COPY main.go .
 
 COPY src/ ./src
 COPY docs/ ./docs
-COPY dist/ ./dist
 
-COPY model/ "$HOME/.cache/transformer"
+RUN go mod tidy
 
-# Run Go commands
-RUN go clean
-RUN go clean -cache
-
-RUN CGO_ENABLED=1 go build -o chat_app
-
-EXPOSE $APP_PORT
-
-CMD ["./chat_app"]
+RUN CGO_ENABLED=0 go build -o app
 
 ## RUNNING STAGE
 
-#FROM scratch
+FROM scratch
 
-#WORKDIR /app
-#ENV HOME /app
+WORKDIR /app
+COPY --from=build /app/app ./
 
-#COPY --from=build /app/go/app/chat_app ./chat_app
-#COPY --from=build /app/.cache/ ./.cache/
+COPY dist/ ./dist
 
-#COPY dist/ ./dist
+EXPOSE $APP_PORT
 
-#EXPOSE $APP_PORT
-
-#CMD ["./chat_app"]
+CMD ["./app"]

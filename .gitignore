@@ -274,3 +274,8 @@ docs/*
 
 chat_app
 setup-gotch.sh
+
+venv/*
+
+emb_server/model/fine_tuned/*
+emb_server/model/ori_model/*

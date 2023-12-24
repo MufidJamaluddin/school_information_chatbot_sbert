@@ -1,10 +1,12 @@
 version: '3'
+name: 'chatbot_be_sbert_s2s'
+
 services:
   db:
     env_file: .env
     build:
       context: ./db
-      dockerfile: /db_dockerfile
+      dockerfile: db_dockerfile
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -16,13 +18,22 @@ services:
     networks:
       - app_network
 
+  emb:
+    build:
+      context: ./emb_server
+      dockerfile: emb_server_dockerfile
+    ports:
+      - '5500:5500'
+    networks:
+      - app_network
+
   app:
     env_file: .env
     ports:
       - '80:${APP_PORT}'
     build:
       context: ./
-      dockerfile: /app_dockerfile
+      dockerfile: app_dockerfile
     networks:
       - app_network
 

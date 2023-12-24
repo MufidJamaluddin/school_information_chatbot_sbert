@@ -4,9 +4,9 @@ import (
 	_ "chatbot_be_go/docs"
 	"chatbot_be_go/src"
 	"chatbot_be_go/src/application"
-	dm "chatbot_be_go/src/domain"
 	"chatbot_be_go/src/persistence"
 	appConf "chatbot_be_go/src/persistence/config"
+	dm "chatbot_be_go/src/persistence/rest"
 	"fmt"
 	"log"
 	"net/http"
@@ -38,16 +38,10 @@ func main() {
 	appValidator := validator.New()
 
 	httpClient := &http.Client{
-		Timeout: config.Http.S2STimeoutSecs,
+		Timeout: config.Http.S2STimeout,
 	}
 
-	var vectorizer dm.ISBertVectorizer
-
-	if config.IsFineTuneModel {
-		vectorizer = dm.NewSBertVectorizer("/fine_tuned_model", "model.pkl")
-	} else {
-		vectorizer = dm.NewSBertVectorizer("/ori_model", "model.pkl")
-	}
+	vectorizer := dm.NewSBertVectorizer(config)
 
 	persistenceObj := persistence.New(
 		vectorizer,

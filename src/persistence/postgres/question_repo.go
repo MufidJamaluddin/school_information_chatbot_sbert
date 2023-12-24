@@ -3,7 +3,7 @@ package postgres
 import (
 	fe "chatbot_be_go/src/application/question"
 	"chatbot_be_go/src/application/question/dto"
-	dm "chatbot_be_go/src/domain"
+	dm "chatbot_be_go/src/persistence/rest"
 	"context"
 	"database/sql"
 	"fmt"
@@ -56,8 +56,8 @@ func (t *questionRepository) FindAnswer(nearestAnswer string) (answer string, er
 		),
 	).Scan(&answer, &similarityValue)
 
-	if similarityValue < 0 {
-		err = sql.ErrNoRows
+	if similarityValue < -0.01 {
+		answer = ""
 		return
 	}
 

@@ -2,9 +2,10 @@ package main
 
 import (
 	abdto "chatbot_be_go/src/application/abbreviation/dto"
-	dm "chatbot_be_go/src/domain"
 	"chatbot_be_go/src/persistence"
+	"chatbot_be_go/src/persistence/config"
 	appConf "chatbot_be_go/src/persistence/config"
+	dm "chatbot_be_go/src/persistence/rest"
 	"context"
 	"database/sql"
 	"encoding/csv"
@@ -19,10 +20,10 @@ import (
 )
 
 type testModel struct {
-	ScenarioNo    uint64
-	ScenarioName  string
-	ModelPath     string
-	ModelFileName string
+	ScenarioNo      uint64
+	ScenarioName    string
+	Config          *config.AppConfig
+	IsFineTuneModel bool
 }
 
 // Menyimpan Data Singkatan dari CSV kedalam Database
@@ -230,21 +231,24 @@ func main() {
 
 	testScenario := []testModel{
 		{
-			ScenarioNo:    1,
-			ScenarioName:  "ori_model",
-			ModelPath:     "/ori_model",
-			ModelFileName: "model.pkl",
+			ScenarioNo:      1,
+			ScenarioName:    "ori_model",
+			Config:          config,
+			IsFineTuneModel: false,
 		},
 		{
-			ScenarioNo:    2,
-			ScenarioName:  "fine_tuned_model",
-			ModelPath:     "/fine_tuned_model",
-			ModelFileName: "model.pkl",
+			ScenarioNo:      2,
+			ScenarioName:    "fine_tuned_model",
+			Config:          config,
+			IsFineTuneModel: true,
 		},
 	}
 
 	for _, scenario := range testScenario {
-		vectorizer := dm.NewSBertVectorizer(scenario.ModelPath, scenario.ModelFileName)
+		config := scenario.Config
+		config.IsFineTuneModel = scenario.IsFineTuneModel
+
+		vectorizer := dm.NewSBertVectorizer(config)
 
 		persistenceObj := persistence.New(
 			vectorizer,
