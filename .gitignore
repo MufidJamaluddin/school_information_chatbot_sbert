@@ -274,3 +274,5 @@ docs/*
 
 chat_app
 setup-gotch.sh
+
+test_chatbot/test_chatbot
