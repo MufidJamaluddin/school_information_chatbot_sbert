@@ -24,7 +24,7 @@ func (d *dashboardResumeRepository) GetDashboardResume(ctx context.Context) (res
 	err = sqlDb.QueryRowContext(
 		ctx,
 		`WITH totalUser AS (
-			SELECT COUNT(*) AS total FROM public."chat_user"
+			SELECT COUNT(*) AS total FROM public."user"
 		), totalQuestion AS (
 			SELECT COUNT(*) AS total FROM public."question"
 		), totalGreeting AS (

@@ -1,6 +1,8 @@
 import { JSX  } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { getUserData } from '../../models/session';
+import { logoutAction } from '../../models/login/login_rest';
+import { toast } from 'react-toastify';
 
 interface DashboardLayoutProp {
   links: Array<{
@@ -15,6 +17,31 @@ interface DashboardLayoutProp {
 
 function DashboardLayout(props: DashboardLayoutProp): JSX.Element {
   const userData = getUserData();
+  const navigate = useNavigate();
+
+  const onLogout = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.preventDefault();
+
+    toast.promise(
+      logoutAction(),
+      {
+        success: {
+          render(){
+            navigate('/login');
+
+            return 'Anda berhasil logout!'
+          }
+        },
+        error: {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          render({ data: { response: { data = 'Koneksi anda terputus!' } = {} } = {} }){
+            return data;
+          }
+        }
+      }
+    );
+  };
 
   return (
     <div id="wrapper">
@@ -65,10 +92,10 @@ function DashboardLayout(props: DashboardLayoutProp): JSX.Element {
                     </span>
                   </a>
                   <div className="dropdown-menu shadow dropdown-menu-end animated--grow-in">
-                    <a className="dropdown-item" href="#">
+                    <div className="dropdown-item" onClick={onLogout}>
                       <i className="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>
                       &nbsp;Logout
-                    </a>
+                    </div>
                   </div>
                 </div>
               </li>

@@ -2,10 +2,12 @@ import { JSX, useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 import { loginAction } from '../models/login';
+import { getUserData } from '../models/session';
 
 function LoginPage(): JSX.Element {
   const [loginData, setLoginData] = useState<{ username: string, password: string }|null>(null)
   const navigate = useNavigate();
+  const userData = getUserData();
 
   useEffect(() => {
     if (!loginData || !loginData.username || !loginData.password) {
@@ -35,6 +37,11 @@ function LoginPage(): JSX.Element {
     const password = e.currentTarget.password.value;
 
     setLoginData({ username, password });
+  }
+
+  if (userData?.fullName) {
+    navigate('/dashboard');
+    return <>Loading...</>
   }
 
   return (

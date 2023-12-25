@@ -54,7 +54,6 @@ COPY main.go .
 COPY src/ ./src
 COPY docs/ ./docs
 COPY dist/ ./dist
-COPY test_chatbot/ ./test_chatbot
 
 COPY model/ "$HOME/.cache/transformer"
 

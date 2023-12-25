@@ -1,5 +1,5 @@
 import axios from "axios";
-import { setData } from "../session";
+import { setData, clearData } from "../session";
 
 interface ResponseData { 
   data: { 
@@ -8,6 +8,10 @@ interface ResponseData {
       fullName: string 
     } 
   } 
+}
+
+interface IChangeData { 
+  message: string
 }
 
 /**
@@ -34,4 +38,23 @@ export async function loginAction(username: string, password: string): Promise<R
   setData(data?.data?.token, data?.data?.userData);
   
   return data;
+}
+
+/**
+ * Logout Action
+ * 
+ * @param username string
+ * @param password string
+ * @returns 
+ */
+export async function logoutAction(): Promise<IChangeData> {
+  const baseApiPath = import.meta.env.VITE_BASE_API_PATH || '';
+
+  const data = await axios.delete<void, { data: IChangeData }>(
+    `${baseApiPath}/login`,
+  );
+
+  clearData();
+
+  return data.data;
 }
