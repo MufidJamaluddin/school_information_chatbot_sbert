@@ -7,7 +7,7 @@ import axios from "axios";
  * @param question string
  * @returns 
  */
-export async function getAnswer(question: string) {
+export async function getAnswer(question: string, name: string) {
   const baseApiPath = import.meta.env.VITE_BASE_API_PATH || '';
 
   const { data: { answer } = {} } = await axios.get<{ question: string }, { data: { answer: string } }>(
@@ -16,6 +16,7 @@ export async function getAnswer(question: string) {
       method: 'GET',
       params: {
         question,
+        name,
       }
     }
   );

@@ -162,7 +162,7 @@ function ChatPage(): JSX.Element {
   const chatUserData = getChatUserData();
   const noChatUserData = !chatUserData;
 
-  const changeRoleAct = ((chEv: any) => {
+  const changeRoleAct = ((chEv: React.ChangeEvent<HTMLSelectElement>) => {
     switch (chEv.target.value) {
       case 'student':
         setShowClass(true);
@@ -240,7 +240,7 @@ function ChatPage(): JSX.Element {
 
       if (!String(chatLast.data).toLowerCase().includes('belum jelas')) {
         try {
-          answer = await getAnswer(chatLast.data);
+          answer = await getAnswer(chatLast.data, chatUserData.fullName);
         } catch (e) {
           answer = 'Jaringan tidak tersedia. Mohon coba lagi nanti.'
         }
@@ -264,7 +264,7 @@ function ChatPage(): JSX.Element {
     }
 
     requestAnswer();
-  }, [chats]);
+  }, [chats, chatUserData]);
 
   const markUserRate = (idx: number, userRate: number) => {
     const mChats = [...chats];

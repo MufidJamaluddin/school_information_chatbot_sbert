@@ -3,13 +3,9 @@ package question
 import "context"
 
 type IQuestionRepository interface {
-	FindAnswer(
-		nearestAnswer string,
-	) (answer string, err error)
-
 	FindAnswerWithSimilarityValue(
 		ctx context.Context,
-		nearestAnswer string,
+		question string,
 	) (
 		answer string,
 		similarityValue float64,

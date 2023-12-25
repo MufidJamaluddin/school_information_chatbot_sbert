@@ -54,6 +54,7 @@ func NewQuestionHandler(
 func (q *questionHandler) GetAnswer(c *fiber.Ctx) (err error) {
 	var answerChat string
 	var answerGreeting string
+	var similarityValue float64
 
 	var answer dto.AnswerQuestionDTO
 	question := c.Query("question")
@@ -63,7 +64,10 @@ func (q *questionHandler) GetAnswer(c *fiber.Ctx) (err error) {
 		answerGreeting = ""
 	}
 
-	if answerChat, err = q.questionRepository.FindAnswer(question); err != nil {
+	if answerChat, similarityValue, err = q.questionRepository.FindAnswerWithSimilarityValue(
+		c.Context(),
+		question,
+	); err != nil {
 		q.logger.Error(err)
 
 		return c.Status(fiber.StatusNotFound).SendString(
@@ -74,7 +78,7 @@ func (q *questionHandler) GetAnswer(c *fiber.Ctx) (err error) {
 		)
 	}
 
-	if answerChat == "" {
+	if answerChat == "" || similarityValue < 0 {
 		answerChat = "Jawaban tidak ketemu"
 	}
 

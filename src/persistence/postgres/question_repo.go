@@ -27,43 +27,6 @@ func NewQuestionRepository(
 	}
 }
 
-func (t *questionRepository) FindAnswer(nearestAnswer string) (answer string, err error) {
-	sqlDb := t.db.GetSqlDb()
-	var similarityValue float64
-
-	sbertVector, err := t.vectorizer.Encode(nearestAnswer)
-	if err != nil {
-		return
-	}
-
-	params := strings.ReplaceAll(
-		fmt.Sprintf("%f", sbertVector),
-		" ",
-		",",
-	)
-
-	err = sqlDb.QueryRow(
-		fmt.Sprintf(
-			`SELECT
-				answer,
-				question_vector_sbert <-> '%s' AS similarity
-			FROM
-				"question"
-			ORDER BY
-				similarity
-			LIMIT 1;`,
-			params,
-		),
-	).Scan(&answer, &similarityValue)
-
-	if similarityValue < 0 {
-		answer = ""
-		return
-	}
-
-	return
-}
-
 func (t *questionRepository) FindAnswerWithSimilarityValue(
 	ctx context.Context,
 	nearestAnswer string,
