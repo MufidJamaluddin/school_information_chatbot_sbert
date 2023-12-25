@@ -9,6 +9,12 @@ type QuestionItemDTO struct {
 	UpdatedBy   string `json:"updatedBy"`
 }
 
+type QuestionItemDTOWithVector struct {
+	QuestionId uint64    `json:"id"`
+	Question   string    `json:"question"`
+	Vector     []float64 `json:"vector"`
+}
+
 type CreateQuestionDTO struct {
 	Question    string `json:"question" validate:"nonzero,max=255"`
 	Answer      string `json:"answer" validate:"nonzero,max=2550"`

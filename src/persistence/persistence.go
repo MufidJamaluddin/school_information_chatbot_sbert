@@ -51,7 +51,7 @@ func New(
 	adminRepository := postgres.NewAdminRepository(db)
 	abbreviationRepository := postgres.NewAbbreviationRepository(db)
 	greetingRepository := postgres.NewGreetingRepository(db)
-	questionRepository := postgres.NewQuestionRepository(db, vectorizer)
+	questionRepository := postgres.NewQuestionRepository(logger, db, vectorizer)
 	userRepository := postgres.NewUserRepository(db)
 	userResponseRepository := postgres.NewUserResponseRepository(db)
 

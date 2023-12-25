@@ -41,6 +41,10 @@ type IQuestionRepository interface {
 		questionId uint64,
 	) error
 
+	ResetSBERTVectorQuestion(
+		ctx context.Context,
+	) error
+
 	TruncateQuestion(
 		ctx context.Context,
 	) error

@@ -7,6 +7,7 @@ import (
 	dm "chatbot_be_go/src/domain"
 	"chatbot_be_go/src/persistence"
 	appConf "chatbot_be_go/src/persistence/config"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -62,6 +63,13 @@ func main() {
 		httpClient,
 		persistenceObj,
 	)
+
+	// Fix Anomaly Different Result per Build
+	if err := persistenceObj.QuestionRepository.ResetSBERTVectorQuestion(
+		context.Background(),
+	); err != nil {
+		log.Fatal(err)
+	}
 
 	jwtMiddleware := jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{

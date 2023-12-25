@@ -24,6 +24,7 @@ func RegisterRoute(app *fiber.App, handler *application.Handler, secretResource 
 	loginApi.Delete("", secretResource, handler.LoginHandler.LogoutAction)
 
 	api.Post("/register-admin", secretResource, handler.AdminHandler.RegisterAdmin)
+	api.Put("/vector-space-model-reset", secretResource, handler.QuestionHandler.ResetQuestionVector)
 
 	// UC03 Memasukkan Pertanyaan dan Jawaban
 	questionHandler := handler.QuestionHandler

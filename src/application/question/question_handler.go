@@ -21,6 +21,7 @@ type IQuestionHandler interface {
 	CreateNewQuestion(c *fiber.Ctx) error
 	UpdateQuestion(c *fiber.Ctx) error
 	DeleteQuestion(c *fiber.Ctx) error
+	ResetQuestionVector(c *fiber.Ctx) error
 }
 
 type questionHandler struct {
@@ -294,5 +295,33 @@ func (q *questionHandler) DeleteQuestion(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"id":      questionId,
 		"message": "Question Successfully Deleted!",
+	})
+}
+
+// DeleteQuestion godoc
+// @Security BasicAuth
+// @securityDefinitions.basic BasicAuth
+// @Tags "UC03 Memasukkan Pertanyaan dan Jawaban"
+// @Summary Delete one Question by id
+// @Description Delete one Question by id
+// @Param id path int true "Question ID"
+// @Accept  json
+// @Produce json
+// @Success 200 {object} dto.UpdateQuestionResponseDTO
+// @Failure 400 {object} string
+// @Failure 404 {object} string
+// @Router /api/vector-space-model-reset/ [put]
+func (q *questionHandler) ResetQuestionVector(c *fiber.Ctx) (err error) {
+	if err = q.questionRepository.ResetSBERTVectorQuestion(c.Context()); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(
+			fmt.Sprintf(
+				"Error on Save Greeting: %s",
+				err.Error(),
+			),
+		)
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "Vector Space Model Succesfully Resetted!",
 	})
 }

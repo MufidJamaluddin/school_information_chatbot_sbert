@@ -8,9 +8,12 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 type questionRepository struct {
+	logger     *logrus.Logger
 	db         IDB
 	vectorizer dm.ISBertVectorizer
 }
@@ -18,10 +21,12 @@ type questionRepository struct {
 var _ fe.IQuestionRepository = &questionRepository{}
 
 func NewQuestionRepository(
+	logger *logrus.Logger,
 	db IDB,
 	vectorizer dm.ISBertVectorizer,
 ) fe.IQuestionRepository {
 	return &questionRepository{
+		logger:     logger,
 		db:         db,
 		vectorizer: vectorizer,
 	}
@@ -287,4 +292,59 @@ func (t *questionRepository) TruncateQuestion(ctx context.Context) (err error) {
 
 	err = trx.Commit()
 	return
+}
+
+func (q *questionRepository) ResetSBERTVectorQuestion(ctx context.Context) error {
+	db := q.db.GetSqlDb()
+	var data dto.QuestionItemDTOWithVector
+
+	updateStmt, err := db.Prepare(
+		`UPDATE "question" SET question_vector_sbert=$2 WHERE id = $1;`,
+	)
+	if err != nil {
+		return err
+	}
+
+	defer updateStmt.Close()
+
+	rows, err := db.QueryContext(
+		ctx,
+		`SELECT
+			id,
+			question,
+		FROM
+			public."question"`,
+	)
+	if err != nil {
+		return err
+	}
+
+	for rows.Next() {
+		if err = rows.Scan(
+			&data.QuestionId,
+			&data.Question,
+		); err != nil {
+			q.logger.Error("Error in ResetSBERTVectorQuestion:Next", err)
+			return err
+		}
+
+		data.Vector, err = q.vectorizer.Encode(data.Question)
+		if err != nil {
+			q.logger.Error("Error in ResetSBERTVectorQuestion:Encode", err)
+			continue
+		}
+
+		sbertVectorStr := strings.ReplaceAll(
+			fmt.Sprintf("%f", data.Vector),
+			" ",
+			",",
+		)
+
+		if _, err = updateStmt.Exec(data.QuestionId, sbertVectorStr); err != nil {
+			q.logger.Error("Error in ResetSBERTVectorQuestion:Update Data", err)
+			continue
+		}
+	}
+
+	return nil
 }
