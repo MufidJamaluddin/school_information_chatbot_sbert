@@ -57,7 +57,7 @@ func (t *questionRepository) FindAnswer(nearestAnswer string) (answer string, er
 	).Scan(&answer, &similarityValue)
 
 	if similarityValue < 0 {
-		err = sql.ErrNoRows
+		answer = ""
 		return
 	}
 
