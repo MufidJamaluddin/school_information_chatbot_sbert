@@ -80,8 +80,13 @@ func (s *sbertVectorizer) Encode(text string) (result []float64, err error) {
 	}
 
 	tokenIdsTensor := ts.TensorFrom(tokenIds).MustTo(s.compileMode, true)
+	defer tokenIdsTensor.Drop()
+
 	typeIdsTensor := ts.TensorFrom(typeIds).MustTo(s.compileMode, true)
+	defer typeIdsTensor.Drop()
+
 	positionIdsTensor := ts.TensorFrom(positionIds).MustTo(s.compileMode, true)
+	defer positionIdsTensor.Drop()
 
 	ts.NoGrad(func() {
 		sbertResult, err := s.model.ForwardT(
