@@ -309,11 +309,7 @@ func (q *questionRepository) ResetSBERTVectorQuestion(ctx context.Context) error
 
 	rows, err := db.QueryContext(
 		ctx,
-		`SELECT
-			id,
-			question,
-		FROM
-			public."question"`,
+		`SELECT id, question FROM public."question"`,
 	)
 	if err != nil {
 		return err
