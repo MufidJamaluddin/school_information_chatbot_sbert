@@ -158,7 +158,7 @@ func loadDataQuestionAndAnswer(
 	wg.Wait()
 
 	if err = persistenceObj.QuestionRepository.ResetSBERTVectorQuestion(ctx); err != nil {
-		log.Printf("\nError in Reset SBERT Vector for No %s: %+v\n", no, err)
+		log.Printf("\nError in Reset SBERT Vector for %+v\n", err)
 	}
 }
 
