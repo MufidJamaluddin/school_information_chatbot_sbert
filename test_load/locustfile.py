@@ -21,6 +21,7 @@ class MyUser(HttpUser):
     def answer_question(self):
         headers = {
             'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
         }
 
         randQuestion = test_data[randrange(len(test_data))]
