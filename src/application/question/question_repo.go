@@ -41,6 +41,14 @@ type IQuestionRepository interface {
 		questionId uint64,
 	) error
 
+	SaveNewQuestionWithoutSBERTVector(
+		ctx context.Context,
+		question string,
+		answer string,
+		roleGroupId uint64,
+		createdBy string,
+	) (uint64, error)
+
 	ResetSBERTVectorQuestion(
 		ctx context.Context,
 	) error

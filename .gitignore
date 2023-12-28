@@ -276,3 +276,6 @@ chat_app
 setup-gotch.sh
 
 test_chatbot/test_chatbot
+
+test_load/venv
+test_load/__pycache__

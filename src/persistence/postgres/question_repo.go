@@ -179,7 +179,7 @@ func (t *questionRepository) SaveNewQuestion(
 	)
 
 	trx, err := t.db.GetSqlDb().BeginTx(ctx, &sql.TxOptions{
-		Isolation: sql.LevelSerializable,
+		Isolation: sql.LevelDefault,
 	})
 
 	if err != nil {
@@ -257,7 +257,7 @@ func (t *questionRepository) DeleteQuestion(
 	questionId uint64,
 ) (err error) {
 	trx, err := t.db.GetSqlDb().BeginTx(ctx, &sql.TxOptions{
-		Isolation: sql.LevelSerializable,
+		Isolation: sql.LevelDefault,
 	})
 
 	if err != nil {
@@ -286,6 +286,44 @@ func (t *questionRepository) TruncateQuestion(ctx context.Context) (err error) {
 	}
 
 	if _, err = trx.Exec(`TRUNCATE TABLE question RESTART IDENTITY CASCADE;`); err != nil {
+		_ = trx.Rollback()
+		return
+	}
+
+	err = trx.Commit()
+	return
+}
+
+func (q *questionRepository) SaveNewQuestionWithoutSBERTVector(
+	ctx context.Context,
+	question string,
+	answer string,
+	roleGroupId uint64,
+	createdBy string,
+) (questionId uint64, err error) {
+	trx, err := q.db.GetSqlDb().BeginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelDefault,
+	})
+
+	if err != nil {
+		return
+	}
+
+	stmt, err := trx.Prepare(
+		`INSERT INTO "question" (role_group_id, question, answer, created_by) VALUES ($1, $2, $3, $4) RETURNING id;`,
+	)
+
+	if err != nil {
+		_ = trx.Rollback()
+		return
+	}
+
+	if err = stmt.QueryRow(
+		roleGroupId,
+		question,
+		answer,
+		createdBy,
+	).Scan(&questionId); err != nil {
 		_ = trx.Rollback()
 		return
 	}
