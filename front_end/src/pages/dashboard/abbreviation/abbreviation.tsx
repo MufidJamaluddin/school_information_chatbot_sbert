@@ -94,15 +94,28 @@ function AbbreviationPage(): JSX.Element {
   const pages = [];
   const totalPage = Math.ceil((data?.length || 0) / (searchParam.size || 1)); 
 
-  for (let pageNum = 1; pageNum <= totalPage; pageNum += 1) {
-    pages.push(pageNum);
+  if (totalPage > 1) {
+    pages.push(1);
+  
+    if (searchParam.page > 1) {
+      pages.push(searchParam.page - 1);
+    }
+  
+    pages.push(searchParam.page);
+  
+    if (searchParam.page < totalPage) {
+      pages.push(searchParam.page + 1);
+    }
+  
+    pages.push(totalPage);
   }
 
   return (
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1 className="text-dark mb-1">Sinonim</h1>
+          <h1 className="text-dark mb-1">Singkatan</h1>
+          <p>Tidak Dipakai Langsung, Terpisah dari Aplikasi, perlu Fine-Tuned Ulang</p>
         </div>
         <div className="col-md-6 col-xl-2">
           <button className="btn btn-primary" type="button" onClick={() => navigate('/dashboard/abbreviation/new')}>

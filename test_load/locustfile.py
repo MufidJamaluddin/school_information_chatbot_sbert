@@ -26,7 +26,7 @@ class MyUser(HttpUser):
 
         randQuestion = test_data[randrange(len(test_data))]
 
-        response = self.client.post(f'/api/answer?question={randQuestion}', headers=headers)
+        response = self.client.get(f'api/answer?question={randQuestion}', headers=headers)
 
         if response.status_code != 200:
             print(f"Error: {response.status_code}, Response Text: {response.text}")

@@ -87,8 +87,20 @@ function RoleGroupPage(): JSX.Element {
   const pages = [];
   const totalPage = Math.ceil((data?.length || 0) / (searchParam.size || 1)); 
 
-  for (let pageNum = 1; pageNum <= totalPage; pageNum += 1) {
-    pages.push(pageNum);
+  if (totalPage > 1) {
+    pages.push(1);
+  
+    if (searchParam.page > 1) {
+      pages.push(searchParam.page - 1);
+    }
+  
+    pages.push(searchParam.page);
+  
+    if (searchParam.page < totalPage) {
+      pages.push(searchParam.page + 1);
+    }
+  
+    pages.push(totalPage);
   }
 
   return (

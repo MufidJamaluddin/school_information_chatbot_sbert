@@ -4,8 +4,10 @@ import (
 	"chatbot_be_go/src/application/greeting"
 	"chatbot_be_go/src/application/question/dto"
 	"chatbot_be_go/src/application/shared"
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -311,15 +313,12 @@ func (q *questionHandler) DeleteQuestion(c *fiber.Ctx) error {
 // @Failure 400 {object} string
 // @Failure 404 {object} string
 // @Router /api/vector-space-model-reset/ [put]
-func (q *questionHandler) ResetQuestionVector(c *fiber.Ctx) (err error) {
-	if err = q.questionRepository.ResetSBERTVectorQuestion(c.Context()); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(
-			fmt.Sprintf(
-				"Error on Save Greeting: %s",
-				err.Error(),
-			),
-		)
-	}
+func (q *questionHandler) ResetQuestionVector(c *fiber.Ctx) error {
+	go func() {
+		if err := q.questionRepository.ResetSBERTVectorQuestion(context.Background()); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Vector Space Model Succesfully Resetted!",
