@@ -97,8 +97,14 @@ function GreetingPage(): JSX.Element {
   const totalPage = Math.ceil((data?.length || 0) / (searchParam.size || 1)); 
 
   if (totalPage > 1) {
-    pages.push(1);
-  
+    if (searchParam.page > 5) {
+      pages.push(1);
+    }
+
+    if (searchParam.page > 2) {
+      pages.push(searchParam.page - 2);
+    }
+
     if (searchParam.page > 1) {
       pages.push(searchParam.page - 1);
     }
@@ -108,8 +114,14 @@ function GreetingPage(): JSX.Element {
     if (searchParam.page < totalPage) {
       pages.push(searchParam.page + 1);
     }
+
+    if (searchParam.page + 1 < totalPage) {
+      pages.push(searchParam.page + 2);
+    }
   
-    pages.push(totalPage);
+    if (searchParam.page + 3 < totalPage) {
+      pages.push(totalPage);
+    }
   }
 
   return (
