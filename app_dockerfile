@@ -19,7 +19,7 @@ RUN CGO_ENABLED=0 go build -o app
 
 ## RUNNING STAGE
 
-FROM scratch
+FROM alpine:3.19.1
 
 WORKDIR /app
 COPY --from=build /app/app ./
@@ -28,4 +28,4 @@ COPY dist/ ./dist
 
 EXPOSE $APP_PORT
 
-CMD ["./app"]
+CMD "./app"
