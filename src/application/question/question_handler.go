@@ -314,11 +314,9 @@ func (q *questionHandler) DeleteQuestion(c *fiber.Ctx) error {
 // @Failure 404 {object} string
 // @Router /api/vector-space-model-reset/ [put]
 func (q *questionHandler) ResetQuestionVector(c *fiber.Ctx) error {
-	go func() {
-		if err := q.questionRepository.ResetSBERTVectorQuestion(context.Background()); err != nil {
-			log.Println(err)
-		}
-	}()
+	if err := q.questionRepository.ResetSBERTVectorQuestion(context.Background()); err != nil {
+		log.Println(err)
+	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Vector Space Model Succesfully Resetted!",
