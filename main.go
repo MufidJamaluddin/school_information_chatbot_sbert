@@ -32,11 +32,14 @@ import (
 func main() {
 	_ = godotenv.Load()
 
-	app := fiber.New()
 	logger := logrus.New()
 
 	config := appConf.New()
 	appValidator := validator.New()
+
+	app := fiber.New(fiber.Config{
+		Prefork: config.Prefork,
+	})
 
 	httpClient := &http.Client{
 		Timeout: config.Http.S2STimeoutSecs,

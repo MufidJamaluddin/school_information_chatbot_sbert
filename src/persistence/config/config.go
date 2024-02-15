@@ -10,6 +10,7 @@ import (
 )
 
 type AppConfig struct {
+	Prefork              bool
 	Http                 HttpConf
 	SqlDb                SqlDbConf
 	WhatsAppConf         WhatsAppConf
@@ -110,6 +111,7 @@ func New() *AppConfig {
 	}
 
 	return &AppConfig{
+		Prefork:              os.Getenv("PREFORK") == "true",
 		Http:                 httpConf,
 		SqlDb:                sqlDbConf,
 		WhatsAppConf:         whatsAppConf,

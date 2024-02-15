@@ -65,7 +65,7 @@ RUN CGO_ENABLED=1 go build -o chat_app
 
 EXPOSE $APP_PORT
 
-CMD ["./chat_app"]
+CMD "./chat_app"
 
 ## RUNNING STAGE
 
