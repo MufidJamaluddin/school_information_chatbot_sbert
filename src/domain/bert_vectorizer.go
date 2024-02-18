@@ -3,6 +3,7 @@ package domain
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/MufidJamaluddin/transformer"
 	"github.com/MufidJamaluddin/transformer/bert"
@@ -55,6 +56,8 @@ func NewSBertVectorizer(filePath, fileName string) ISBertVectorizer {
 }
 
 func (s *sbertVectorizer) Encode(text string) (result []float64, err error) {
+	text = strings.TrimSpace(strings.ReplaceAll(text, "/", " "))
+
 	singleEncodeInput := tokenizer.NewSingleEncodeInput(tokenizer.NewInputSequence(text))
 
 	encodingResult, err := s.tokenizer.Encode(singleEncodeInput, true)
