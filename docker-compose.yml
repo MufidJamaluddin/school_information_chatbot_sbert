@@ -1,5 +1,5 @@
 version: '3'
-name: 'chatbot_be_sbert_s2s'
+name: 'chatbot_be_sbert_s2s_lt'
 
 services:
   db:
