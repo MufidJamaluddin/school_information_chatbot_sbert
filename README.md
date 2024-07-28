@@ -1,4 +1,4 @@
-# Chatbot Back End Go
+# Indonesian Sentence-BERT Retrieval-Based Q&A Chatbot (Go & React)
 
 ### Screenshot
 
